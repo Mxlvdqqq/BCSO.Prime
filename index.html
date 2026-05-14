@@ -1,0 +1,330 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BCSO PANEL</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://kit.fontawesome.com/7a4b62b0a4.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="login-screen" id="loginScreen">
+      <div class="login-card">
+        <div class="login-badge">
+          <span>BCSO</span>
+          <small>Blaine County Sheriff Office
+          </small>
+        </div>
+        <h1>BCSO PANEL</h1>
+        <p class="login-subtitle">Accès réservé aux officiers | Matricule et mot de passe requis</p>
+        <div class="field-group">
+          <label for="matricule">Matricule</label>
+          <input type="text" id="matricule" placeholder="Entrez votre matricule">
+        </div>
+        <div class="field-group">
+          <label for="password">Mot de passe</label>
+          <input type="password" id="password" placeholder="Entrez votre mot de passe">
+        </div>
+        <button class="action-btn" onclick="login()">Connexion</button>
+        <p class="login-error" id="loginError"></p>
+        <p class="forgot-password">Mot de passe oublié ? Contactez un <strong>État-major</strong>.</p>
+        <div class="login-hint">Test : <strong>bcso</strong> / <strong>1234</strong></div>
+      </div>
+    </div>
+
+    <div class="dashboard hidden" id="dashboard">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-icon"><i class="fas fa-star"></i></div>
+          <div>
+            <h2>Blaine County Sheriff Office</h2>
+            <span>BCSO Panel</span>
+          </div>
+        </div>
+
+        <nav class="menu">
+          <button class="menu-btn active" onclick="switchTab('home', this)"><i class="fas fa-home"></i>Accueil</button>
+          <button class="menu-btn" onclick="switchTab('service', this)"><i class="fas fa-clock"></i>Service</button>
+          <button class="menu-btn" onclick="switchTab('procedure', this)"><i class="fas fa-book"></i>Procédures</button>
+          <button class="menu-btn" onclick="switchTab('settings', this)"><i class="fas fa-cog"></i>Paramètres</button>
+          <button class="menu-btn" id="logsBtn" onclick="switchTab('logs', this)" style="display: none;"><i class="fas fa-list"></i>Logs</button>
+        </nav>
+
+        <div class="sidebar-foot">
+          <p>Mode sombre activé</p>
+        </div>
+      </aside>
+
+      <main class="content">
+        <section class="tab-panel active" id="home">
+          <div class="page-header">
+            <div>
+              <span class="eyebrow">Tableau de bord</span>
+              <h1>Bienvenue sur le panel BCSO</h1>
+            </div>
+            <div class="status-pill"><i class="fas fa-star"></i> Officier en service</div>
+          </div>
+
+          <div class="cards-grid">
+            <article class="card dark-card">
+              <div class="card-head">
+                <h2>Services effectués</h2>
+              </div>
+              <div class="value-block" id="serviceSessionsCount">0</div>
+              <div class="card-actions">
+                <button class="secondary-btn" onclick="switchTab('service', this)">Voir les services effectués / en cours</button>
+              </div>
+            </article>
+
+            <article class="card dark-card">
+              <div class="card-head">
+                <h2>Temps de service</h2>
+                <span>Heures totalisées</span>
+              </div>
+              <div class="value-block" id="serviceTime">0h 00m</div>
+              <div class="detail-note">Démarrer et arrêter pour calculer automatiquement.</div>
+            </article>
+
+            <article class="card dark-card large-card">
+              <div class="card-head">
+                <h2>Résumé</h2>
+                <span>Aperçu rapide</span>
+              </div>
+              <div class="summary-grid">
+                <div><span>Statut</span><strong id="statusText">Hors service</strong></div>
+                <div><span>Service : nombre</span><strong id="activeServices">0</strong></div>
+              </div>
+              <div class="active-agents">
+                <span>Agents en service</span>
+                <div id="activeAgentsList"><p>Aucun agent en service.</p></div>
+              </div>
+            </article>
+
+            <article class="card dark-card" id="createAccountHomeCard" style="display:none;">
+              <div class="card-head">
+                <h2>Recrutement</h2>
+                <span>Créer un compte agent</span>
+              </div>
+              <div class="card-actions">
+                <button class="primary-btn" onclick="showCreateAccountModal()">Créer un compte</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="service">
+          <div class="page-header">
+            <div>
+              <span class="eyebrow">Service</span>
+              <h1>Gestion du service</h1>
+            </div>
+            <div class="status-pill" id="serviceStatusPill"><i class="fas fa-clock"></i> Hors service</div>
+          </div>
+
+          <div class="cards-grid">
+            <article class="card dark-card">
+              <div class="card-head">
+                <h2>Contrôle du service</h2>
+                <span>Démarrer ou arrêter votre service</span>
+              </div>
+              <div class="card-actions">
+                <button class="primary-btn" id="serviceBtn" onclick="toggleService()">Prendre service</button>
+              </div>
+            </article>
+
+            <article class="card dark-card">
+              <div class="card-head">
+                <h2>Temps actuel</h2>
+                <span>Session en cours</span>
+              </div>
+              <div class="value-block" id="currentSessionTime">00h 00m 00s</div>
+              <div class="detail-note">Temps écoulé depuis le début du service.</div>
+            </article>
+
+            <article class="card dark-card large-card">
+              <div class="card-head">
+                <h2>Historique récent</h2>
+                <span>Dernières sessions</span>
+              </div>
+              <div class="history-list" id="serviceHistory">
+                <p>Aucune session récente.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="procedure">
+          <div class="page-header">
+            <div>
+              <span class="eyebrow">Procédures</span>
+              <h1>Espace procédures</h1>
+            </div>
+          </div>
+          <div class="procedure-area">
+            <p>Zone de contenu pour coller votre propre HTML plus tard.</p>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="settings">
+          <div class="page-header">
+            <div>
+              <span class="eyebrow">Paramètres</span>
+              <h1>Préférences du panel</h1>
+            </div>
+          </div>
+          <div class="settings-grid">
+            <div class="card dark-card settings-card">
+              <h2>Apparence</h2>
+              <p>Changer le thème de l'interface.</p>
+              <button class="primary-btn" onclick="toggleTheme()">Basculer mode clair / sombre</button>
+            </div>
+            <div class="card dark-card settings-card">
+              <h2>Mot de passe</h2>
+              <p>Mettre à jour vos identifiants de connexion.</p>
+              <label>Ancien mot de passe</label>
+              <input type="password" id="oldPassword" placeholder="Ancien mot de passe">
+              <label>Nouveau mot de passe</label>
+              <input type="password" id="newPassword" placeholder="Nouveau mot de passe">
+              <label>Confirmer le nouveau mot de passe</label>
+              <input type="password" id="confirmPassword" placeholder="Confirmer le mot de passe">
+              <button class="secondary-btn" onclick="savePassword()">Sauvegarder</button>
+              <p class="save-note">Le changement est simulé localement, mais avec vérification d'identité.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="logs">
+          <div class="page-header">
+            <div>
+              <span class="eyebrow">Administration</span>
+              <h1>Logs et gestion</h1>
+            </div>
+          </div>
+          <div class="cards-grid">
+            <article class="card dark-card large-card">
+              <div class="card-head">
+                <h2>Temps de service des agents</h2>
+                <span>Vue d'ensemble</span>
+              </div>
+              <div class="logs-content" id="agentsServiceTime">
+                <p>Chargement...</p>
+              </div>
+            </article>
+
+            <article class="card dark-card">
+              <div class="card-head">
+                <h2>Gestion des comptes</h2>
+                <span>Créer, modifier ou supprimer</span>
+              </div>
+              <div class="account-management">
+                <button class="primary-btn" onclick="showCreateAccountModal()">Créer compte</button>
+                <button class="secondary-btn" onclick="showManageAccountsModal()">Gérer comptes</button>
+                <button class="secondary-btn" id="managePendingBtn" onclick="managePendingAccounts()" style="display: none;">Valider demandes</button>
+              </div>
+            </article>
+
+            <article class="card dark-card">
+              <div class="card-head">
+                <h2>Modifier heures de service</h2>
+                <span>Ajouter ou retirer rapidement</span>
+              </div>
+              <div class="time-modifier">
+                <input type="text" id="modifyMatricule" placeholder="Matricule (ex: 07)">
+                <div class="time-fields">
+                  <input type="number" id="customHours" min="0" placeholder="Heures">
+                  <input type="number" id="customMinutes" min="0" max="59" placeholder="Minutes">
+                </div>
+                <div class="time-controls">
+                  <button class="time-btn" onclick="applyCustomTime('remove')">Retirer</button>
+                  <button class="time-btn" onclick="applyCustomTime('add')">Ajouter</button>
+                </div>
+                <div class="quick-buttons">
+                  <button class="time-btn" onclick="modifyTime(-60)">-1h</button>
+                  <button class="time-btn" onclick="modifyTime(-30)">-30m</button>
+                  <button class="time-btn" onclick="modifyTime(30)">+30m</button>
+                  <button class="time-btn" onclick="modifyTime(60)">+1h</button>
+                </div>
+                <div class="reset-section">
+                  <button class="reset-btn" onclick="showResetConfirm()">Reset total des heures</button>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <!-- Modals -->
+          <div class="modal hidden" id="createAccountModal">
+            <div class="modal-content">
+              <h3>Créer une demande de compte</h3>
+              <p style="font-size: 0.9rem; color: #999;">Recruteurs et État-major peuvent créer des comptes. La demande est envoyée pour validation par l'administration.</p>
+              <input type="text" id="newAccountMatricule" placeholder="Matricule">
+              <input type="password" id="newAccountPassword" placeholder="Mot de passe">
+              <input type="text" id="newAccountDiscordId" placeholder="ID Discord (copier depuis Discord)">
+              <label for="newAccountRoles">Rôles (Ctrl+clic pour plusieurs)</label>
+              <select id="newAccountRoles" multiple>
+                <option value="Corps exécutif">Corps exécutif</option>
+                <option value="Corps d'encadrement">Corps d'encadrement</option>
+                <option value="Corps de commandement">Corps de commandement</option>
+                <option value="État-major">État-major</option>
+                <option value="Recruteur">Recruteur</option>
+              </select>
+              <button class="primary-btn" onclick="requestAccountCreation()" style="width: 100%; margin-top: 1rem;">Demander la création</button>
+              <button class="secondary-btn" onclick="closeModal('createAccountModal')" style="width: 100%; margin-top: 0.5rem;">Annuler</button>
+            </div>
+          </div>
+
+          <div class="modal hidden" id="managePendingAccountsModal">
+            <div class="modal-content large">
+              <h3>Comptes en attente de validation</h3>
+              <p style="font-size: 0.9rem; color: #999;">Seuls les Corps de commandement et État-major peuvent valider ou refuser les comptes.</p>
+              <div class="pending-accounts-list" id="pendingAccountsList">
+                <p>Chargement des comptes en attente...</p>
+              </div>
+              <button class="secondary-btn" onclick="closeModal('managePendingAccountsModal')" style="width: 100%; margin-top: 1rem;">Fermer</button>
+            </div>
+          </div>
+
+          <div class="modal hidden" id="manageAccountsModal">
+            <div class="modal-content large">
+              <h3>Gérer les comptes</h3>
+              <div class="accounts-list" id="accountsList">
+                <!-- Accounts will be populated here -->
+              </div>
+              <button onclick="closeModal('manageAccountsModal')">Fermer</button>
+            </div>
+          </div>
+
+          <!-- Confirmation Modal -->
+          <div class="modal hidden" id="confirmationModal">
+            <div class="modal-content confirmation-content">
+              <div class="confirmation-icon" id="confirmationIcon"><i class="fas fa-exclamation-triangle"></i></div>
+              <h3 id="confirmationTitle">Confirmer</h3>
+              <p id="confirmationMessage"></p>
+              <div class="confirmation-buttons">
+                <button class="confirm-btn" onclick="executeConfirmation()">Confirmer</button>
+                <button class="cancel-btn" onclick="cancelConfirmation()">Annuler</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Double Confirmation Modal -->
+          <div class="modal hidden" id="doubleConfirmModal">
+            <div class="modal-content confirmation-content danger-confirm">
+              <div class="confirmation-icon danger"><i class="fas fa-exclamation-circle"></i></div>
+              <h3 id="doubleConfirmTitle">Action irréversible</h3>
+              <p id="doubleConfirmMessage"></p>
+              <p class="warning-text">Cette action ne peut pas être annulée.</p>
+              <div class="confirmation-buttons">
+                <button class="danger-btn" onclick="executeDoubleConfirmation()">Oui, continuer</button>
+                <button class="cancel-btn" onclick="cancelConfirmation()">Annuler</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
